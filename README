@@ -1,0 +1,23 @@
+README
+=====
+
+Alternating bit protocol program: (alt.c)
+1) It uses increasing sequence numbers. But it waits for the ack packet from the receiver.
+2) It handles the packet loss using the timer. The timer expires when there is no activity between the sender and receiver.
+
+Go Back N: (gobackn.c)
+1) It uses a buffer of large length to store all the packets from the application layer.
+2) Those packets are sent which are only within the window and the timer starts for the first packet.
+3) If the timer goes off all the unacked packets are being resent.
+4) On the receiver side, the packets are being check for corruption only. When a packet with a sequence number with difference of 1 then the previous acked value is received,
+the packet is accepted. Else, it is rejected and the old ack is sent again to inform the sender that the packet received was invalid.
+5) On the sender side, when the ack packets are received they are checked for corruption. If not corrupted are accepted and their position is updated in the unacked array.
+This is how the acked and unacked packets of the window are kept. Also, the window slides when all the acked packets are received.
+
+Selective repeat program: (sr.c)
+1) It is based on the Go Bank N program. However, the two major differences are, both sender and receiver have buffers and the timer used is only one.
+2) The timer used is for the first packet in the window and the time of each packet is being tracked using an array of structure un_acked[].timetrack.
+3) When the first timer goes off and no ack has been received the packet is retransmitted and the timer is again set to 100.0
+4) If the ack is received before the timer expires, the time of arrival of the ack packet is subtracted to the timetrack variable for each unacked packet and a new timer value
+is set for the next unacked packet.
+5) On the receiver side, the buffer accepts only packets within the window and sends the acks of the valid (and uncorrupted) packets being received.
